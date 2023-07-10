@@ -1,0 +1,495 @@
+{% extends 'home.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/stype_page.css">
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/jquery-3.6.0.min.js"></script>
+<main>
+    <!-- =========================== input CFT -->
+    <div class="container-preview">
+        <div style="max-width: 83% ; color: white;" class="container-fluid">
+            <label>Input Information</label>
+            <div class="row">
+                <div class="info_data col-lg-12">
+                    <h2 style="color: white;"></h2>
+                    <div class="form-select">
+                        <div class="select_sty">
+                            <label for="custom-select">CFT :</label>
+                        </div>
+                        <div>
+                            <select id="custom-select" onchange="handleCustomSelectChange(this)">
+                                <option value="">CFT</option>
+                            </select>
+                        </div>
+
+                        <div class="select_sty">
+                            <label for="project-select">Project :</label>
+                        </div>
+                        <div>
+                            <select id="project-select" name="project-select"
+                                onchange="handleProjectSelectChange(this)">
+                                <option value="">Project</option>
+                            </select>
+                        </div>
+
+                        <div class="select_sty">
+                            <label for="type-select">Model : </label>
+                        </div>
+                        <div>
+                            <select id="type-select" onchange="handleTypeSelectChange(this)">
+                                <option value="">Model</option>
+                            </select>
+                        </div>
+
+                        <!-- <div class="select_sty">
+                            <label for="model-select">Label :</label>
+                        </div>
+                        <div>
+                            <select id="model-select" onchange="handleModelSelectChange(this)">
+                                <option value="">Label</option>
+                            </select>
+                        </div> -->
+                        <!-- 
+                        <div>
+                            <button class="btn btn-info" id="show-template" onclick="showSelectedImage()">Show</button>
+                        </div> -->
+
+                        <div style="margin-top: 4px; margin-left: 4%" id="notification">
+                            <button class="btn btn-info" id=""><a style="color: white;"
+                                    href="http://10.220.40.75:3596/">New</a></button>
+                            <button class="btn btn-info" id=""><a style="color: white;"
+                                    href="http://10.220.40.220:3333/edit/database">Edit Data</a></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container-fluid" style="max-width: 85%">
+            <div class="row"
+                style="max-height: 35vh; border: solid 1px white; margin: 4px; border-radius: 4px; color: white">
+                <div class="col-lg-8">
+                    <h3 id="labelHeading" style="text-align: center;color: white; margin-top: 4%; margin-left: 50%">
+                        Chọn Model để hiển thị label tại đây!!!
+                    </h3>
+                    <div id="selectedValue"></div>
+                    <!-- <img id="selectedValue" src="{{ image_path }}" alt="Image"> -->
+                </div>
+                <div class="col-lg-4" style="margin-top:2% ;max-width : 100% ; max-height: 300px; min-height : 100px">
+                    <div id="imageContainer"></div>
+                </div>
+            </div>
+        </div>
+        <style>
+            #selectedValue {
+                max-height: 16em;
+                overflow-y: auto;
+            }
+        </style>
+        <script>
+
+            
+            
+            var selectedValue = document.getElementById("selectedValue");
+
+            selectedValue.addEventListener("DOMNodeInserted", function () {
+                if (selectedValue.innerHTML.trim() !== "") {
+                    var labelHeading = document.getElementById("labelHeading");
+                    labelHeading.style.display = "none";
+                }
+            });
+        </script>
+
+        <div class="container-fluid" style="max-width: 85%">
+            <label class="tabel_name" for="">Data Select</label>
+            <div class="mager_imdata">
+                <div class="left-column">
+                    <div class="col-lg-12" style="overflow-y: auto;">
+                        <div id="data-table" class="table_import">
+                            {% if html3 %}
+                            {{html3 | safe}}
+                            {% else %}
+                            <h3 style="text-align: center; color: white; margin-top: 2%">Chưa có dữ liệu được thêm!!!
+                            </h3>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="select_handle">
+                <button class="btn btn-info">Edit</button>
+                <button class="btn btn-info">Duplicate</button>
+            </div> -->
+            <!-- <details>
+                <p>
+                    <summary class="btn btn-info"> Hiển Thị Ảnh Label</summary>
+                </p>
+                <p id="imgLabel" style="max-width : 100% ; max-height: 300px;">
+                    <img style="max-width : 50% ; max-height: 150px;" src="/static/images/b438bb7c90be4ee017af.jpg"
+                        alt="Hình ảnh">    
+                </p>
+            </details> -->
+        </div>
+
+        <div style="max-width: 85%;" class="container-fluid">
+            <label style="color: white; margin-top: 2%;" class="table_name" for="">Data Import</label>
+        </div>
+
+        <div style="max-width: 85%;" class="container-fluid">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#page1">Data Processing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#page2">Import Data</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="page1" class="tab-pane fade show active">
+                    <h4 style="color: white; text-align: center">Dữ liệu đã chọn lọc, chờ xác nhận để làm label</h4>
+                    <div class="row">
+                        <div class="col-lg-12" style="overflow-y: auto">
+                            <div class="left-column">
+                                <div class="table_import" id="data_processing"
+                                    style="max-height: 70vh; overflow-y: auto; min-height: 100px">
+                                    {% if html2 %}
+                                    {{ html2 | safe }}
+                                    {% else %}
+                                    <h3 style="text-align: center; color: white;  margin-top: 2%">Chưa có dữ liệu được
+                                        thêm!!!</h3>
+                                    {% endif %}
+                                </div>
+                                <!-- <div>
+                                    <form id="upload_inrow" enctype="multipart/form-data">
+                                        <div class="input-group mb-3">
+                                            <input class="form-control" type="file" name="file1" id="file1"
+                                                accept=".doc,.docx, .pdf" multiple>
+                                            <div class="input-group-append">
+                                                <input class="btn btn-info" type="button" value="Upload in selected row"
+                                                    onclick="func()">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+
+                </style>
+                <div id="page2" class="tab-pane fade">
+                    <h4 style="color: white; text-align: center">Dữ liệu thô, chọn từng dòng để đưa vào danh sách chờ
+                        xác nhận</h4>
+                    <div class="container-fluid">
+                        <div id="hide_Submit">
+                            <form action="/get_type_by_project" id="uploadForm" enctype="multipart/form-data">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" type="file" name="file1" id="file1" accept=".doc,.docx">
+                                    <div class="input-group-append">
+                                        <input class="btn btn-info" type="button" value="Submit"
+                                            onclick="fn_uploaddata()">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div style="text-align: center; color: white; margin-top: 3%;" id="custom-select-message">
+                            <h3>Vui lòng Chọn Project trước khi upload file!!!</h3>
+                        </div>
+                        <div id="ketqua" style="max-height: 70vh; overflow-y: auto;"></div>
+                        <script>
+                            function fn_uploaddata() {
+                                var formData = new FormData($('#uploadForm')[0]);
+                                var projectSelect = document.getElementById('project-select');
+                                var modelId = document.getElementById('type-select').value;
+                                var projectID = projectSelect.value;
+                                formData.append('project-select', projectID); // Thêm giá trị project-select vào formData
+                                formData.append('model_id', modelId); // Thêm giá trị model_id vào formData
+
+                                fetch('/upload_file', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        console.log(data);
+                                        $.ajax({
+                                            url: '/Data/Process',
+                                            type: 'POST',
+                                            data: formData,
+                                            contentType: false,
+                                            processData: false,
+                                            success: function (response) {
+                                                $('#ketqua').html(response);
+                                            },
+                                            error: function (xhr, status, error) {
+                                                console.log(error);
+                                            }
+                                        });
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                            }
+
+                            $(document).ready(function () {
+                                // Bắt sự kiện khi giá trị được truyền vào #ketqua
+                                $(document).on('DOMNodeInserted', '#ketqua', function () {
+                                    // Tìm cột
+                                    var selectColumnIndex = $("#ketqua table th:contains('Select')").index();
+                                    var newFileColumnIndex = $("#ketqua table th:contains('New file ZPL')").index();
+                                    var importColumIndex = $("#ketqua table th:contains('Import File')").index();
+                                    var chuthichColumIndex = $("#ketqua table th:contains('chú thích')").index();
+
+                                    // Ẩn cột và giá trị 
+                                    $("#ketqua table tr").each(function () {
+                                        $(this).find("th, td").eq(selectColumnIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(newFileColumnIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(importColumIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(chuthichColumIndex).addClass("hidden-column");
+                                    });
+                                });
+
+                                $(document).on('DOMNodeInserted', '#data_processing', function () {
+                                    var newFileColumnIndex = $("#data_processing table th:contains('New file ZPL')").index();
+                                    $("#data_processing table tr").each(function () {
+                                        $(this).find("th, td").eq(newFileColumnIndex).addClass("hidden-column");
+                                    });
+                                });
+
+                                $(document).on('DOMNodeInserted', '#data-table', function () {
+                                    var datarowColumnIndex = $("#ketqua table th:contains('Data Row')").index();
+                                    var selectColumnIndex = $("#ketqua table th:contains('Select')").index();
+                                    var importColumIndex = $("#data-table table th:contains('Import File')").index();
+                                    var chuthichColumIndex = $("#data-table table th:contains('chú thích')").index();
+                                    $("#data-table table tr").each(function () {
+                                        $(this).find("th, td").eq(datarowColumnIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(selectColumnIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(importColumIndex).addClass("hidden-column");
+                                        $(this).find("th, td").eq(chuthichColumIndex).addClass("hidden-column");
+                                    });
+                                });
+                            });
+
+                        </script>
+                        <style>
+                            .hidden-column {
+                                display: none;
+                            }
+                        </style>
+                    </div>
+                    <br>
+                    <!-- <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12" style="overflow-y: auto;">
+                                <div class="table_import" id="data_import" style="max-height: 70vh; overflow-y: auto;">
+                                    {{ html_table | safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <br>
+            <br>
+            <br>
+        </div>
+        <br>
+        <br>
+        <br><br>
+        <br>
+        <br>
+
+    </div>
+</main>
+
+<script>
+
+    //save select
+    var selectBox = document.getElementById('custom-select');
+    var selectBoxProject = document.getElementById('project-select')
+    var messageDiv = document.getElementById('custom-select-message');
+    var hideSubmitDiv = document.getElementById('hide_Submit');
+
+    function checkSubmitVisibility() {
+        if (!selectBox.value || !selectBoxProject.value) {
+            messageDiv.style.display = 'block'; // Hiển thị text
+            hideSubmitDiv.style.display = 'none'; // Ẩn div
+        } else {
+            messageDiv.style.display = 'none'; // Ẩn text
+            hideSubmitDiv.style.display = 'block'; // Hiển thị div
+        }
+    }
+
+    selectBox.addEventListener('change', checkSubmitVisibility);
+    selectBoxProject.addEventListener('change', checkSubmitVisibility);
+
+    // Kiểm tra trạng thái ban đầu của CFT
+    if (!selectBox.value) {
+        messageDiv.style.display = 'block'; // Hiển thị dòng văn bản
+        hideSubmitDiv.style.display = 'none'; // Ẩn div
+    } else {
+        messageDiv.style.display = 'none'; // Ẩn dòng văn bản
+        hideSubmitDiv.style.display = 'block'; // Hiển thị div
+    }
+
+    // Gửi yêu cầu truy vấn server khi có thay đổi trong select custom
+    function handleCustomSelectChange(selectElement) {
+        var selectedValue = selectElement.value;
+
+        // Gửi yêu cầu AJAX đến server
+        $.ajax({
+            url: '/get_projects_by_custom',
+            method: 'POST',
+            data: JSON.stringify({ name_custom: selectedValue }),
+            contentType: 'application/json',
+            success: function (response) {
+                // Xóa các option hiện tại trong select project
+                $('#project-select').empty();
+                var optionElement = $('<option>').val('0').text("");
+                $('#project-select').append(optionElement);
+                // Thêm các option mới vào select project từ kết quả trả về
+                for (var i = 0; i < response.length; i++) {
+                    var projectId = response[i][0];
+                    var projectName = response[i][1];
+                    var optionElement = $('<option>').val(projectId).text(projectName);
+                    $('#project-select').append(optionElement);
+                }
+                if (selectedValue !== "") {
+                    $('#project-select').val("");
+                }
+                if (selectBox.value === '') {
+                    button.disabled = true;
+                } else {
+                    button.disabled = false;
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+
+    function handleProjectSelectChange(selectElement) {
+        var selectedValue = selectElement.value;
+        var projectSelect = document.getElementById("project-select");
+        var selectedOption = projectSelect.options[projectSelect.selectedIndex];
+        var value_select = selectedOption.text;
+        // Gửi yêu cầu AJAX đến server
+        $.ajax({
+            url: '/get_type_by_project',
+            method: 'POST',
+            data: JSON.stringify({
+                id_project: selectedValue,
+                value_select: value_select
+            }),
+            contentType: 'application/json',
+            success: function (response) {
+                $('#type-select').empty();
+                var optionElement = $('<option>').val('0').text("");
+                $('#type-select').append(optionElement);
+                // Thêm các option mới vào select type từ kết quả trả về
+                for (var i = 0; i < response.length; i++) {
+                    var typeId = response[i][0];
+                    var typeName = response[i][1];
+                    var optionElement = $('<option>').val(typeId).text(typeName);
+                    $('#type-select').append(optionElement);
+                }
+
+                if (selectedValue !== "") {
+                    $('#type-select').value("");
+                }
+
+                // Chọn giá trị đầu tiên trong danh sách (nếu có)
+                if (response.length > 0) {
+                    $('#type-select').val(response[0][0]);
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+
+    //chọn option Model thì hiển thị các label đã tạo trong foder. hoặc database
+    function handleTypeSelectChange(selectElement) {
+        var selectedValue = selectElement.value;
+        var projectSelect = document.getElementById("type-select");
+        var selectedOption = projectSelect.options[projectSelect.selectedIndex];
+        var value_select = selectedOption.text;
+        // Gửi yêu cầu AJAX đến server
+        $.ajax({
+            url: '/get_Model_by_Type',
+            method: 'POST',
+            data: JSON.stringify({
+                id_model: selectedValue,
+                value_select: value_select
+            }),
+            contentType: 'application/json',
+            success: function (response) {
+                var selectedValueDiv = $('#selectedValue');
+                selectedValueDiv.empty();
+            
+                // Tạo input tìm kiếm
+                var searchInput = $('<input>').addClass('form-control').attr('type', 'text').attr('placeholder', 'Search...');
+                var searchInputGroup = $('<div>').addClass('input-group mb-3').append(searchInput);
+                selectedValueDiv.append(searchInputGroup);
+            
+                // Tạo bảng và các hàng
+                var table = $('<table>').addClass('table table-dark');
+                var tableBody = $('<tbody>');
+            
+                // Thêm các giá trị từ kết quả trả về vào bảng
+                for (var i = 0; i < response.length; i++) {
+                    var label = response[i][0];
+                    var row = $('<tr>');
+                    var cell = $('<td>').text(label);
+                    row.append(cell);
+                    tableBody.append(row);
+                }
+            
+                // Thêm các hàng vào bảng
+                table.append(tableBody);
+                selectedValueDiv.append(table);
+            
+                // Bắt sự kiện khi người dùng nhập vào input tìm kiếm
+                searchInput.on('input', function() {
+                    var searchText = $(this).val().toLowerCase();
+            
+                    // Lặp qua từng hàng trong bảng
+                    table.find('tr').each(function() {
+                        var rowText = $(this).text().toLowerCase();
+            
+                        // Kiểm tra nếu giá trị tìm kiếm có tồn tại trong hàng
+                        if (rowText.indexOf(searchText) !== -1) {
+                            $(this).show(); // Hiển thị hàng nếu tìm thấy
+                        } else {
+                            $(this).hide(); // Ẩn hàng nếu không tìm thấy
+                        }
+                    });
+                });
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        // Xử lý sự kiện khi ô kiểm tra được nhấp
+        $('input[type="checkbox"]').on('change', function () {
+            var rowValues = [];
+            $(this).closest('tr').find('td').each(function () {
+                rowValues.push($(this).text());
+            });
+            console.log(rowValues); // Hiển thị giá trị của các ô trong dòng
+        });
+    });
+
+</script>
+{% endblock %}
